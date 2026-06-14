@@ -1,0 +1,5 @@
+{
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "node ../../scripts/build-embeds.cjs && next build",
+  "framework": "nextjs"
+}
