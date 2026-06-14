@@ -1,0 +1,55 @@
+modules = ["nodejs-20", "web", "php-8.2", "python-3.11", "postgresql-16"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+NEXTAUTH_URL = "https://38b0d827-8a22-458c-b18c-23f005f698fb-00-srg0kvw7ezw.janeway.replit.dev"
+NEXT_PUBLIC_VIEWER_URL = "https://38b0d827-8a22-458c-b18c-23f005f698fb-00-srg0kvw7ezw.janeway.replit.dev"
+NODE_OPTIONS = "--no-node-snapshot"
+NEXT_PUBLIC_SMTP_FROM = "Typebot <noreply@typebot.local>"
+ADMIN_EMAIL = "admin@aichatbotpro.com.au"
+STRIPE_SECRET_KEY = "sk_test_PLACEHOLDER_replace_with_real"
+STRIPE_WEBHOOK_SECRET = "whsec_PLACEHOLDER_replace_with_real"
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY = "pk_test_PLACEHOLDER_replace_with_real"
+STRIPE_STARTER_PRICE_ID = "price_STARTER_PLACEHOLDER"
+STRIPE_PRO_PRICE_ID = "price_PRO_PLACEHOLDER"
+STRIPE_STARTER_CHATS_PRICE_ID = "price_STARTER_CHATS_PLACEHOLDER"
+STRIPE_PRO_CHATS_PRICE_ID = "price_PRO_CHATS_PLACEHOLDER"
+DEFAULT_WORKSPACE_PLAN = "FREE"
+VAPID_PUBLIC_KEY = "BKHglIqIdI5mi8IofZHA1npBAHx7N9G_y65g_ETis7t_5XN9zO2Y5uH5zEMdFlpv1iDTtnMl8msoK4ikwDSvtXE"
+VAPID_EMAIL = "mailto:admin@aichatbotpro.com"
+ENCRYPTION_SECRET = "n+eK3mU0Se9lKnbjA+Ap+g3HJZHpVQoN"
+DEV_LOGIN_SECRET = "devadmin-4kdkyakj-a10dv5b1"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd apps/builder && PORT=3000 NEXT_TELEMETRY_DISABLED=1 ../../node_modules/.bin/next dev -p 3000"
+waitForPort = 3000
+
+[[ports]]
+localPort = 3000
+externalPort = 80

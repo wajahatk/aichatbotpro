@@ -1,0 +1,46 @@
+Now rebrand the entire product from "Typebot" to "AI Chat Bot Pro". Do this
+systematically rather than a blind find-and-replace, because some strings are
+internal package names / npm workspace references that must NOT break the build.
+
+1. Create a single source of truth for branding: a config file (e.g.
+   /packages/config/branding.ts or an env-driven config) containing:
+   - APP_NAME = "AI Chat Bot Pro"
+   - APP_SHORT_NAME = "ACB Pro"
+   - SUPPORT_EMAIL, COMPANY_NAME, LEGAL_ENTITY_NAME
+   - DEFAULT_LOGO_URL, DEFAULT_FAVICON_URL
+   - PRIMARY_COLOR, SECONDARY_COLOR (theme tokens)
+   - SOCIAL_LINKS (twitter, linkedin, etc.)
+
+   IMPORTANT: these values must be OVERRIDABLE at runtime from the database
+   (via the Super Admin Panel built in Phase 4), with the config file values
+   acting only as fallback defaults.
+
+2. Replace all user-facing instances of "Typebot" with the dynamic
+   APP_NAME value pulled from this config/branding settings — in:
+   - Page titles, meta tags, OG images, favicons
+   - Email templates (signup, password reset, lead notification, invoice)
+   - Builder UI (top bar, sidebar, settings pages, onboarding flow)
+   - Viewer/chat widget (remove any "Powered by Typebot" badges/links —
+     replace with a configurable "Powered by {APP_NAME}" badge that can be
+     toggled on/off per client plan)
+   - Error pages, 404/500 pages, loading screens
+   - Docs links and footer links
+
+3. Replace logo and favicon files (typebot-logo.svg, favicons, app icons,
+   social preview images) with placeholder assets named appropriately
+   (acb-pro-logo.svg etc.), and make sure the logo is rendered from the
+   branding config so it can later be swapped via the admin panel without a
+   redeploy.
+
+4. Search for and rename internal references that are purely cosmetic
+   (window titles, manifest.json "name"/"short_name", PWA configs) — but
+   leave npm package names (@typebot.io/...) alone if renaming them risks
+   breaking workspace resolution, UNLESS I explicitly ask for a deeper
+   package rename later.
+
+5. After rebranding, do a final search for the string "typebot" (case
+   insensitive) across the whole repo and show me a list of remaining
+   occurrences with file paths, so I can review and decide what's safe to
+   leave (e.g. internal package imports) vs what still needs changing.
+
+Run the app and confirm nothing is broken after rebranding.

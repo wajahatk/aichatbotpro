@@ -1,0 +1,70 @@
+Build a separate, securely-gated Super Admin Panel at /superadmin, accessible
+only to platform-owner accounts (a new "role" field on User: USER | ORG_ADMIN
+| SUPERADMIN). This is MY control panel for managing the entire SaaS platform.
+
+Sections required:
+
+1. **Branding & Theming**
+   - Upload/replace the global logo, favicon, and app icons
+   - Set the platform name, tagline, support email, and footer text
+   - Set primary/secondary brand colors and font (live preview)
+   - Toggle "Powered by AI Chat Bot Pro" badge globally or per-plan
+   - All changes here should write to a `PlatformSettings` table and be read
+     by the branding config from Phase 1 at runtime (with caching)
+
+2. **Homepage / Marketing Site Content Manager**
+   - Editable hero heading, subheading, CTA button text/links
+   - Editable feature sections (icon, title, description) — add/remove/reorder
+   - Editable testimonials, FAQ section, pricing page copy
+   - SEO settings: meta title, description, OG image per page
+   - All stored in a `PageContent` table keyed by page + section, rendered
+     dynamically on the public homepage built in Phase 5
+
+3. **Plans & Pricing Manager**
+   - CRUD for SubscriptionPlan: name, price, billing interval, feature
+     flags/limits (max bots, max monthly conversations, team seats,
+     white-label toggle, API access, mobile app access, custom domain)
+   - Toggle plan visibility (hidden plans usable only via direct link, for
+     custom enterprise deals)
+   - Sync button to push plan changes to Stripe (create/update Stripe
+     Products & Prices) and PayPal (create/update Billing Plans)
+
+4. **Payment Gateway Settings**
+   - Forms to enter/update Stripe (publishable key, secret key, webhook
+     secret) and PayPal (client ID, secret, mode: sandbox/live)
+   - "Test connection" buttons that verify credentials work
+   - Encrypted storage of all secrets (use the existing ENCRYPTION_SECRET /
+     a dedicated encryption util)
+
+5. **Client (Organization) Management**
+   - Table of all client organizations: name, plan, status, MRR, signup
+     date, last login
+   - Actions: impersonate (login-as for support), suspend/reactivate,
+     manually change plan, extend trial, delete (with confirmation + data
+     export option)
+   - Usage analytics per client (bots created, conversations/month, storage)
+
+6. **Global Analytics Dashboard**
+   - Total clients, MRR/ARR, churn rate, trial-to-paid conversion rate,
+     total conversations processed platform-wide, growth chart over time
+
+7. **Email Template Manager**
+   - Edit subject/body of system emails (welcome, trial ending, payment
+     failed, password reset, new lead notification) with variable
+     placeholders ({{orgName}}, {{planName}}, etc.) and a send-test-email
+     button
+
+8. **Audit Log**
+   - Log all superadmin actions (settings changes, impersonations, plan
+     overrides, credential updates) with timestamp and admin user — viewable
+     and exportable
+
+9. **App Text / Mobile App Content Manager** (ties into Phase 6)
+   - Editable strings used by the mobile app: app name, onboarding screen
+     text, push notification templates, empty-state messages — served via an
+     API the mobile app fetches on launch so I can update copy without
+     resubmitting to app stores
+
+Secure this entire section with: role check middleware, 2FA requirement for
+SUPERADMIN accounts, and rate-limited login. Add a seed script to create the
+first superadmin account from an env variable on first run.

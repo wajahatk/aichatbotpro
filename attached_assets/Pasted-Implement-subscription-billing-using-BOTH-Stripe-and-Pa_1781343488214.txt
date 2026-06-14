@@ -1,0 +1,40 @@
+Implement subscription billing using BOTH Stripe and PayPal, letting the end
+client choose their preferred payment method at checkout.
+
+1. Stripe:
+   - Use Stripe Checkout (subscription mode) for new subscriptions and the
+     Stripe Customer Portal for plan upgrades/downgrades, payment method
+     updates, and cancellations.
+   - Create webhook handler at /api/webhooks/stripe for: checkout.session.
+     completed, customer.subscription.updated, customer.subscription.deleted,
+     invoice.paid, invoice.payment_failed. On these events, update the
+     Organization's Subscription record and send the org owner an email
+     notification.
+   - When a subscription becomes past_due or is cancelled, downgrade the org
+     to a "Restricted" state (bots stop receiving new chat sessions but
+     existing data remains visible) rather than deleting data immediately.
+
+2. PayPal:
+   - Implement PayPal Subscriptions API (REST) — create plans matching the
+     same tiers as Stripe, generate approval links, and handle
+     /api/webhooks/paypal for BILLING.SUBSCRIPTION.ACTIVATED, .CANCELLED,
+     .SUSPENDED, and PAYMENT.SALE.COMPLETED events, mirroring the same status
+     updates as the Stripe flow.
+
+3. Build a unified "Billing" page in the client builder UI showing:
+   - Current plan, renewal date, payment method/provider in use
+   - "Upgrade/Downgrade Plan" with a plan comparison table
+   - "Switch payment method" (Stripe <-> PayPal) with clear warnings about
+     what happens to the existing subscription
+   - Invoice history with downloadable PDF receipts
+
+4. Add a 14-day (configurable) free trial flow for new signups, with
+   automated reminder emails at day 7, day 12, and day 14.
+
+5. All Stripe/PayPal API keys must be configurable per-environment via the
+   Super Admin Panel (built in Phase 4) — NOT hardcoded — so I can switch
+   between sandbox/live keys without redeploying. Store secret keys
+   encrypted at rest.
+
+Test the full flow end-to-end in Stripe test mode and PayPal sandbox mode:
+signup -> trial -> upgrade -> webhook updates plan -> cancel -> downgrade.

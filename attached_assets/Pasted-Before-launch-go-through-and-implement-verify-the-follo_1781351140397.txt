@@ -1,0 +1,43 @@
+Before launch, go through and implement/verify the following:
+
+1. **Security**
+   - Rate limiting on auth endpoints, webhook endpoints, and public APIs
+   - Input validation/sanitization on all user-submitted content (especially
+     bot scripts/flows, since these run on the viewer for end-users)
+   - CSRF protection on all state-changing routes
+   - Ensure tenant isolation is airtight — write automated tests that attempt
+     cross-org data access and confirm they fail
+   - Encrypt all stored payment provider secrets and any client-supplied API
+     keys (e.g. if clients connect their own OpenAI keys to bots)
+   - Set secure cookie flags, HTTPS-only, proper CORS config
+
+2. **Reliability**
+   - Add health-check endpoints (/api/health) for uptime monitoring
+   - Add error logging/monitoring (e.g. Sentry) with DSN configurable via
+     superadmin settings
+   - Database backup strategy notes (since Replit Postgres needs an external
+     backup plan — recommend exporting to S3-compatible storage on a cron)
+
+3. **Compliance basics**
+   - GDPR-style data export and account deletion endpoints (org owner can
+     export all their data and request full deletion)
+   - Cookie consent banner on the marketing site (configurable text via
+     superadmin)
+
+4. **Documentation**
+   - Generate a README covering: environment variables required, how to run
+     locally on Replit, how to deploy, how to access the superadmin panel for
+     the first time, and how to configure Stripe/PayPal/FCM credentials
+
+5. **Final smoke test**
+   - Walk through the entire user journey end-to-end: visit homepage -> sign
+     up for trial -> build a simple bot -> publish it -> have someone fill it
+     out -> confirm lead appears in builder AND mobile app with a push
+     notification -> upgrade to paid plan via Stripe -> repeat upgrade via
+     PayPal on a second test account -> log in to superadmin and change the
+     logo/homepage text and confirm it reflects live on the homepage
+
+Give me a final summary of what's complete, what's stubbed/placeholder (e.g.
+needs real API keys), and any manual steps I still need to take outside of
+Replit (App Store/Play Store setup, domain DNS, production Stripe/PayPal
+activation).

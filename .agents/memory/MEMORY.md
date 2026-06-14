@@ -1,0 +1,3 @@
+- [SA session cookie path](sa-session-cookie-path.md) — must be Path=/ not Path=/superadmin or API routes under /api/* won't receive it
+- [DB session auth pattern](db-session-auth.md) — getToken() always returns null with database sessions; use Prisma Session table lookup instead
+- [WorkspaceProvider export name](workspace-provider-export.md) — exports `workspace` not `currentWorkspace`; /app/* pages must destructure as `{ workspace: currentWorkspace }`

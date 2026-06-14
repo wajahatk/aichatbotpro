@@ -1,0 +1,79 @@
+Instead of a separate native mobile app, turn the client-facing leads
+dashboard into a Progressive Web App (PWA) called "AI Chat Bot Pro", so the
+same codebase works as a responsive website AND can be "installed" to the
+home screen on iOS and Android, with push notifications for new leads.
+
+1. **Build a dedicated client dashboard route** (e.g. /app or a subdomain
+   like app.aichatbotpro.com), separate from the bot-building UI, optimized
+   for mobile-first use. Screens/views:
+   - **Login** — reuse existing auth (JWT/session), "Forgot password" link
+   - **Dashboard/Home** — summary cards: leads today/this week/this month,
+     leads-by-bot chart, quick filter chips
+   - **Leads List** — infinite scroll, pull-to-refresh (implement via
+     touch gesture + scroll-to-top detection), search bar, filter by bot and
+     date range, real-time updates via the SSE/WebSocket stream from Phase 6
+   - **Lead Detail** — all collected variables/answers, timestamp, source
+     bot, "Call"/"Email"/"WhatsApp" quick-action links (tel:, mailto:,
+     https://wa.me/ links) when phone/email fields are detected
+   - **Bots Overview** — read-only list of org's bots with status and
+     response counts
+   - **Notifications** — history of past notifications, tap-through to lead
+   - **Settings** — notification preferences, account info, plan/usage
+     summary, logout
+
+2. **PWA configuration**
+   - Add a `manifest.json` with app name ("AI Chat Bot Pro"), short_name,
+     icons (multiple sizes: 192x192, 512x512, maskable), theme_color,
+     background_color, and display: "standalone"
+   - All of these values (name, icons, colors) should be sourced from the
+     PlatformSettings/branding config from Phase 4, so updating the logo in
+     the Super Admin Panel updates the installable app too (note: changes to
+     icons require the user to reinstall/refresh the PWA to see updates)
+   - Implement a service worker (use a library like `next-pwa` if the
+     framework is Next.js, or Workbox) for: offline caching of the app shell,
+     and background handling of push events
+   - Add an "Install App" prompt component: on Android/Chrome, use the
+     `beforeinstallprompt` event to show a native install banner; on iOS
+     Safari (which doesn't support beforeinstallprompt), show a custom modal
+     with step-by-step instructions ("Tap Share → Add to Home Screen") since
+     this is the ONLY way iOS users get an app icon and push notifications
+
+3. **Web Push Notifications**
+   - Implement the Web Push API using VAPID keys (works on Android Chrome,
+     desktop Chrome/Firefox/Edge immediately, and on iOS Safari ONLY after
+     the user has added the PWA to their home screen and is running iOS
+     16.4+)
+   - On login (or first dashboard visit), request notification permission
+     and register the browser's push subscription via
+     `POST /api/devices/register` (from Phase 6) — store the push
+     subscription object (endpoint + keys) instead of an FCM token
+   - Update the Phase 6 notification sender to deliver via the Web Push
+     protocol (e.g. using the `web-push` npm library) — this single approach
+     covers Android, iOS (when installed), and desktop browsers
+   - Service worker must implement a `push` event listener that displays the
+     notification (title: "New lead from {BotName}", body: summary of first
+     1-2 collected fields, icon: app icon) and a `notificationclick` listener
+     that opens/focuses the app to the relevant lead detail page
+
+4. **Responsive design**
+   - Build with a mobile-first layout (bottom tab navigation on small
+     screens: Home, Leads, Bots, Notifications, Settings; sidebar nav on
+     desktop)
+   - Test on actual device widths for iPhone and common Android sizes, and
+     ensure the "installed" standalone view hides browser UI properly
+     (correct status bar styling via meta tags for iOS)
+
+5. **Offline / connectivity handling**
+   - Cache the last-loaded leads list so the dashboard still shows data when
+     offline, with a "You're offline — showing cached data" banner
+   - Queue any actions performed offline (e.g. marking a lead as read) and
+     sync when connection returns
+
+Deliver:
+- A working preview link of the PWA dashboard
+- A test of the install flow on both an Android phone (Chrome) and an
+  iPhone (Safari) — confirm the app installs to the home screen with the
+  correct icon/name
+- A test push notification received on both an installed Android PWA and an
+  installed iOS PWA (iOS 16.4+), and confirm tapping it opens the correct
+  lead

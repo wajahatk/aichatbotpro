@@ -1,0 +1,7 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="8" fill="#6B5CE7"/>
+  <path d="M8 12C8 10.3431 9.34315 9 11 9H29C30.6569 9 32 10.3431 32 12V23C32 24.6569 30.6569 26 29 26H21.5L15.5 32V26H11C9.34315 26 8 24.6569 8 23V12Z" fill="white"/>
+  <rect x="13" y="14.5" width="13" height="2.5" rx="1.25" fill="#6B5CE7"/>
+  <rect x="13" y="19" width="9" height="2.5" rx="1.25" fill="#6B5CE7"/>
+  <text x="48" y="26" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#111111">ACB Pro</text>
+</svg>
