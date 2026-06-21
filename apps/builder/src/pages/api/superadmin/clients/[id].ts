@@ -21,13 +21,19 @@ export default withSuperAdminApi(async (req, res, admin) => {
   }
 
   if (req.method === "POST") {
-    const { action, planId, days } = req.body as {
-      action: "suspend" | "reactivate" | "change_plan" | "extend_trial" | "delete";
+    const { action, planId, days, customPlan } = req.body as {
+      action: "suspend" | "reactivate" | "change_plan" | "extend_trial" | "delete" | "set_custom_plan" | "load_custom_plan";
       planId?: string;
       days?: number;
+      customPlan?: {
+        chatsLimit: number | null;
+        seatsLimit: number | null;
+        storageLimit: number | null;
+        revertPlan?: string;
+      };
     };
 
-    const workspace = await prisma.workspace.findUnique({ where: { id }, select: { name: true } });
+    const workspace = await prisma.workspace.findUnique({ where: { id }, select: { name: true, plan: true, customChatsLimit: true, customSeatsLimit: true, customStorageLimit: true } });
     if (!workspace) return res.status(404).json({ error: "Not found" });
 
     if (action === "suspend") {
@@ -49,6 +55,42 @@ export default withSuperAdminApi(async (req, res, admin) => {
       await prisma.workspace.delete({ where: { id } });
       await logAudit(admin.id, admin.email, "DELETE_CLIENT", id, { name: workspace.name });
       return res.status(200).json({ ok: true, deleted: true });
+    } else if (action === "load_custom_plan") {
+      return res.status(200).json({
+        plan: workspace.plan,
+        customChatsLimit: workspace.customChatsLimit,
+        customSeatsLimit: workspace.customSeatsLimit,
+        customStorageLimit: workspace.customStorageLimit,
+      });
+    } else if (action === "set_custom_plan" && customPlan !== undefined) {
+      if (customPlan.revertPlan) {
+        await prisma.workspace.update({
+          where: { id },
+          data: {
+            plan: customPlan.revertPlan as any,
+            customChatsLimit: null,
+            customSeatsLimit: null,
+            customStorageLimit: null,
+          },
+        });
+        await logAudit(admin.id, admin.email, "REVERT_PLAN", id, { name: workspace.name, plan: customPlan.revertPlan });
+      } else {
+        await prisma.workspace.update({
+          where: { id },
+          data: {
+            plan: "CUSTOM" as any,
+            customChatsLimit: customPlan.chatsLimit,
+            customSeatsLimit: customPlan.seatsLimit,
+            customStorageLimit: customPlan.storageLimit,
+          },
+        });
+        await logAudit(admin.id, admin.email, "SET_CUSTOM_PLAN", id, {
+          name: workspace.name,
+          customChatsLimit: customPlan.chatsLimit,
+          customSeatsLimit: customPlan.seatsLimit,
+          customStorageLimit: customPlan.storageLimit,
+        });
+      }
     } else {
       return res.status(400).json({ error: "Unknown action" });
     }
