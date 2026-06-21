@@ -30,7 +30,7 @@ systemctl start postgresql
 
 # Create DB and user
 sudo -u postgres psql <<SQL
-CREATE USER aichatbot WITH PASSWORD 'CHANGE_ME_DB_PASS';
+CREATE USER aichatbot WITH PASSWORD 'VYuxTjehXenmT3pIIGpd09Vb';
 CREATE DATABASE aichatbotpro OWNER aichatbot;
 GRANT ALL PRIVILEGES ON DATABASE aichatbotpro TO aichatbot;
 SQL
